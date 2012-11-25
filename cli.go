@@ -21,7 +21,7 @@ var (
 //showHistory will update and flush the portion of the screen devoted to displaying messages with the last []termbox.Cells in the given history. The number displayed depends on the screen size.
 func showHistory(history [][]t.Cell) (err error) {
 	w, h := t.Size()
-	yMin := 1             //Exclusive
+	yMin := 0             //Exclusive
 	yMax := h - 2         //Inclusive
 	i := len(history) - 1 //The []cell in history being acted on
 
