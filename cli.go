@@ -85,11 +85,7 @@ func interpret(input string) {
 		return
 	}
 
-	cells := make([]t.Cell, len(input))
-	for i := range input {
-		cells[i] = t.Cell{Ch: rune(input[i]), Fg: Fg, Bg: Bg}
-	}
-	chat.History = append(chat.History, cells)
+	chat.NewString("   "+input, Fg)
 	showHistory(chat.History)
 }
 

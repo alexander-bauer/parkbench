@@ -38,16 +38,13 @@ func start() (err error) {
 		return
 	}
 	defer t.Close()
-	_, y := t.Size()
 	t.Clear(Fg, Bg)
 
 	setString(0, 0, "ParkBench", Fg|t.AttrBold, Bg)
-	setString(0, y-2, "Use '/connect <ipv6>' to chat with a friend.", Fg, Bg)
+	M.Chats[ActiveChat].NewString("#  Use '/connect <ipv6>' to chat with a friend.", Fg)
 
-	err = t.Flush()
-	if err != nil {
-		return
-	}
+	//This will flush to the screen, as well.
+	err = showHistory(M.Chats[ActiveChat].History)
 
 	//Queue is declared as a global variable
 	//in cli.go.
@@ -58,6 +55,6 @@ func start() (err error) {
 	}(Queue)
 
 	//Now, just take user input until the user exits.
-	err = loopIn("> ", Queue)
+	err = loopIn(">> ", Queue)
 	return
 }

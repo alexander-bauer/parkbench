@@ -69,3 +69,12 @@ func (c *Chat) Connect(remote string) (err error) {
 	c.Session, err = bench.NewSession(remote, c.manager)
 	return
 }
+
+//Appends a []t.Cell to the end of the History, applying the given t.Attribute as the foreground of the cells. It does not update the screen.
+func (c *Chat) NewString(message string, fg t.Attribute) {
+	cells := make([]t.Cell, len(message))
+	for i := range message {
+		cells[i] = t.Cell{Ch: rune(message[i]), Fg: fg, Bg: Bg}
+	}
+	c.History = append(c.History, cells)
+}
