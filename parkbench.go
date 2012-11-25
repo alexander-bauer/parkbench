@@ -4,6 +4,12 @@ import (
 	//"github.com/SashaCrofter/benchgolib"
 	t "github.com/nsf/termbox-go"
 	"log"
+	"os/user"
+	"path"
+)
+
+var (
+	M *Manager
 )
 
 func main() {
@@ -17,6 +23,14 @@ func main() {
 }
 
 func start() (err error) {
+	usr, err := user.Current()
+	if err != nil {
+		return
+	}
+	confDir := path.Join(usr.HomeDir, ".parkbench")
+
+	M = NewManager(confDir)
+
 	err = t.Init()
 	if err != nil {
 		return

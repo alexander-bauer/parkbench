@@ -2,6 +2,7 @@ package main
 
 import (
 	t "github.com/nsf/termbox-go"
+	"log"
 	"strings"
 )
 
@@ -11,9 +12,7 @@ const (
 )
 
 var (
-	TheChat = Chat{
-		History: make([][]t.Cell, 0),
-	}
+	ActiveChat string
 
 	Queue = make(chan t.Event)
 )
@@ -80,12 +79,18 @@ func interpret(input string) {
 			close(Queue)
 		}
 	}
+	chat := M.Chats[ActiveChat]
+	if chat == nil {
+		log.Println("No active chat.")
+		return
+	}
+
 	cells := make([]t.Cell, len(input))
 	for i := range input {
 		cells[i] = t.Cell{Ch: rune(input[i]), Fg: Fg, Bg: Bg}
 	}
-	TheChat.History = append(TheChat.History, cells)
-	showHistory(TheChat.History)
+	chat.History = append(chat.History, cells)
+	showHistory(chat.History)
 }
 
 func loopIn(prompt string, queue <-chan t.Event) (err error) {
