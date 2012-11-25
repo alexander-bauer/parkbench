@@ -59,7 +59,7 @@ func loopIn(prompt string, queue <-chan t.Event) (err error) {
 		switch ev.Type {
 		case t.EventKey:
 			switch ev.Key {
-			case t.KeyEsc:
+			case t.KeyEsc, t.KeyCtrlC, t.KeyCtrlD:
 				//If the key pressed is esc,
 				//then return immediately.
 				return
@@ -81,6 +81,24 @@ func loopIn(prompt string, queue <-chan t.Event) (err error) {
 				if err != nil {
 					return
 				}
+			case t.KeyBackspace, 0x7f:
+				//If the user presses backspace,
+				//then we need to remove the most
+				//recent character, and decrement
+				//x, but make sure not to go past
+				//where we're allowed.
+				if x > xMin {
+					x--
+					input = input[:len(input)-1]
+					t.SetCell(x, y, ' ', Bg, Fg)
+					err = t.Flush()
+					if err != nil {
+						return
+					}
+				}
+				//If x is already at its minimum,
+				//then we do nothing.
+
 			default:
 				input += string(ev.Ch)
 				t.SetCell(x, y, ev.Ch, Fg, Bg)
