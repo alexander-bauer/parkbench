@@ -30,6 +30,7 @@ func setString(x, y int, s string, fg, bg t.Attribute) {
 //interpret takes a string argument as a command or message typed on the input line. It interprets it and, using global variables, performs the appropriate actions.
 func interpret(input string) {
 	if strings.HasPrefix(input, "/") {
+		input = strings.ToLower(input)
 		//If the input is a command, then
 		//switch on everything after "/"
 		switch input[1:] {
