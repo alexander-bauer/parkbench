@@ -2,9 +2,46 @@ package main
 
 import (
 	//"github.com/SashaCrofter/benchgolib"
-	//"log"
+	t "github.com/nsf/termbox-go"
+	"log"
 )
 
 func main() {
-	Client()
+	err := start()
+	if err != nil {
+		log.Println(err)
+		println("An error was encountered.")
+	}
+	//If error wasn't nil, then we're exiting
+	//gracefully.
+}
+
+func start() (err error) {
+	err = t.Init()
+	if err != nil {
+		return
+	}
+	defer t.Close()
+	_, y := t.Size()
+	t.Clear(t.ColorDefault, t.ColorDefault)
+
+	setString(0, 0, "ParkBench", t.AttrBold, t.ColorDefault)
+	setString(0, y-2, "Use '/connect <ipv6>' to chat with a friend.", t.ColorDefault, t.ColorDefault)
+
+	err = t.Flush()
+	if err != nil {
+		return
+	}
+
+	//Queue is declared as a global variable
+	//in cli.go.
+	go func(queue chan<- t.Event) {
+		for {
+			queue <- t.PollEvent()
+		}
+	}(Queue)
+
+	//Now, just take user input until the user exits.
+	err = loopIn(Queue)
+	return
 }
