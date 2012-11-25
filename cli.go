@@ -46,7 +46,8 @@ func loopIn(prompt string, queue <-chan t.Event) (err error) {
 	x := len(prompt)
 	xMin := x
 
-	_, y := t.Size()
+	xMax, y := t.Size()
+	xMax--
 	y--
 
 	setString(0, y, prompt, Fg, Bg)
@@ -101,6 +102,21 @@ func loopIn(prompt string, queue <-chan t.Event) (err error) {
 
 			default:
 				input += string(ev.Ch)
+
+				//If x is at the end of the screen,
+				//then we need to scroll the buffer
+				//to the right.
+				if x == xMax {
+					x--
+					inputIterator := len(input) - 1
+					for i := x; i >= xMin; i-- {
+						//So, write the input
+						//backward from the end
+						//of the screen.
+						t.SetCell(i, y, rune(input[inputIterator]), Fg, Bg)
+						inputIterator--
+					}
+				}
 				t.SetCell(x, y, ev.Ch, Fg, Bg)
 				err = t.Flush()
 				if err != nil {
