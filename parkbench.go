@@ -23,10 +23,10 @@ func start() (err error) {
 	}
 	defer t.Close()
 	_, y := t.Size()
-	t.Clear(t.ColorDefault, t.ColorDefault)
+	t.Clear(Fg, Bg)
 
-	setString(0, 0, "ParkBench", t.AttrBold, t.ColorDefault)
-	setString(0, y-2, "Use '/connect <ipv6>' to chat with a friend.", t.ColorDefault, t.ColorDefault)
+	setString(0, 0, "ParkBench", Fg+t.AttrBold, Bg)
+	setString(0, y-2, "Use '/connect <ipv6>' to chat with a friend.", Fg, Bg)
 
 	err = t.Flush()
 	if err != nil {
@@ -42,6 +42,6 @@ func start() (err error) {
 	}(Queue)
 
 	//Now, just take user input until the user exits.
-	err = loopIn(Queue)
+	err = loopIn("> ", Queue)
 	return
 }

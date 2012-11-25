@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+const (
+	Fg = t.ColorDefault //Default foreground color
+	Bg = t.ColorDefault //Default background color
+)
+
 var (
 	Queue = make(chan t.Event)
 )
@@ -14,6 +19,7 @@ func newMessage(s string) {
 
 }
 
+//Uses a simple for loop to write a string of characters on the screen in a single line. It does not flush to the screen.
 func setString(x, y int, s string, fg, bg t.Attribute) {
 	for c := range s {
 		t.SetCell(x, y, rune(s[c]), fg, bg)
@@ -33,11 +39,20 @@ func interpret(input string) {
 	}
 }
 
-func loopIn(queue <-chan t.Event) (err error) {
+func loopIn(prompt string, queue <-chan t.Event) (err error) {
 	var input string
-	var x, y int
-	_, y = t.Size()
+
+	x := len(prompt)
+	xMin := x
+
+	_, y := t.Size()
 	y--
+
+	setString(0, y, prompt, Fg, Bg)
+	err = t.Flush()
+	if err != nil {
+		return
+	}
 
 	for ev := range queue {
 		switch ev.Type {
@@ -52,9 +67,22 @@ func loopIn(queue <-chan t.Event) (err error) {
 				//interpret the input, and
 				//possibly send a message.
 				interpret(input)
+
+				//Now blank the buffer
+				input = ""
+				//and clear the user input part of
+				//the screen.
+				for i := xMin; i < x; i++ {
+					t.SetCell(i, y, ' ', Bg, Fg)
+				}
+				x = xMin
+				err = t.Flush()
+				if err != nil {
+					return
+				}
 			default:
 				input += string(ev.Ch)
-				t.SetCell(x, y, ev.Ch, t.ColorDefault, t.ColorDefault)
+				t.SetCell(x, y, ev.Ch, Fg, Bg)
 				err = t.Flush()
 				if err != nil {
 					return
