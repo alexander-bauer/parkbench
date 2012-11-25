@@ -55,9 +55,9 @@ type Chat struct {
 	Session *bench.Session //The current Session for the chat
 }
 
-//Returns a *Chat with the Partner and History objects initialized. The Session field is not initialized, and must be made using Chat.Connect().
-func (m *Manager) NewChat(partner string) *Chat {
-	return &Chat{
+//Adds a *Chat with the Partner and History objects initialized to the supplied Manager's Chats map. Its key is the supplied partner string. The Session field is not initialized, and must be made using Connect().
+func (m *Manager) NewChat(partner string) {
+	m.Chats[partner] = &Chat{
 		manager: m,
 		Partner: partner,
 		History: make([][]t.Cell, 0),

@@ -29,7 +29,9 @@ func start() (err error) {
 	}
 	confDir := path.Join(usr.HomeDir, ".parkbench")
 
-	M = NewManager(confDir)
+	M = NewManager(confDir) //Now initialize the Manager,
+	ActiveChat = "main"     //switch the chat to "main",
+	M.NewChat(ActiveChat)   //and start a chat of that name.
 
 	err = t.Init()
 	if err != nil {
