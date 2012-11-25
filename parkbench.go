@@ -41,7 +41,7 @@ func start() (err error) {
 	t.Clear(Fg, Bg)
 
 	setString(0, 0, "ParkBench", Fg|t.AttrBold, Bg)
-	M.Chats[ActiveChat].NewString("#  Use '/connect <ipv6>' to chat with a friend.", Fg)
+	M.Chats[ActiveChat].NewString(SysPrefix+"Use '/connect <ipv6>' to chat with a friend.", SysColor)
 
 	//This will flush to the screen, as well.
 	err = showHistory(M.Chats[ActiveChat].History)

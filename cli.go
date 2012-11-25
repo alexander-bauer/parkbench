@@ -9,6 +9,14 @@ import (
 const (
 	Fg = t.ColorDefault //Default foreground color
 	Bg = t.ColorDefault //Default background color
+
+	SysColor = t.ColorDefault //Color for system messages
+	InColor  = t.ColorDefault //Color for incoming messages
+	OutColor = t.ColorDefault //Color for outgoing messages
+
+	SysPrefix = "#  " //Prefix for system messages
+	InPrefix  = "-> " //Prefix for incoming messages
+	OutPrefix = "   " //Prefix for outgoing messages
 )
 
 var (
@@ -85,7 +93,7 @@ func interpret(input string) {
 		return
 	}
 
-	chat.NewString("   "+input, Fg)
+	chat.NewString(OutPrefix+input, OutColor)
 	showHistory(chat.History)
 }
 
