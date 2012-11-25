@@ -21,13 +21,13 @@ var (
 //showHistory will update and flush the portion of the screen devoted to displaying messages with the last []termbox.Cells in the given history. The number displayed depends on the screen size.
 func showHistory(history [][]t.Cell) (err error) {
 	w, h := t.Size()
-	yMin := 1 //Exclusive
-	yMax := h - 2 //Inclusive
-	i := len(history)-1 //The []cell in history being acted on
-	
+	yMin := 1             //Exclusive
+	yMax := h - 2         //Inclusive
+	i := len(history) - 1 //The []cell in history being acted on
+
 	for y := yMax; y > yMin; y-- {
 		var histCells []t.Cell
-		if i > 0 {
+		if i >= 0 {
 			//If there's no more history,
 			//then just leave them blank
 			//and let the normal running
@@ -38,7 +38,7 @@ func showHistory(history [][]t.Cell) (err error) {
 
 		padding := w - (len(histCells) % w)
 		//Initialize with length of history[i], with enough room for length history[i] plus padding
-		cells := make([]t.Cell, len(histCells), len(histCells) + padding)
+		cells := make([]t.Cell, len(histCells), len(histCells)+padding)
 		//Place history[i] in it
 		copy(cells[:len(histCells)], histCells)
 		for j := 0; j < padding; j++ {
@@ -70,7 +70,7 @@ func interpret(input string) {
 	if len(input) == 0 {
 		return
 	}
-	
+
 	if strings.HasPrefix(input, "/") {
 		input = strings.ToLower(input)
 		//If the input is a command, then
