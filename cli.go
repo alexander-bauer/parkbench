@@ -11,12 +11,50 @@ const (
 )
 
 var (
+	TheChat = Chat{
+		History: make([][]t.Cell, 0),
+	}
+
 	Queue = make(chan t.Event)
 )
 
-//
-func newMessage(s string) {
+//showHistory will update and flush the portion of the screen devoted to displaying messages with the last []termbox.Cells in the given history. The number displayed depends on the screen size.
+func showHistory(history [][]t.Cell) (err error) {
+	w, h := t.Size()
+	yMin := 1 //Exclusive
+	yMax := h - 2 //Inclusive
+	i := len(history)-1 //The []cell in history being acted on
+	
+	for y := yMax; y > yMin; y-- {
+		var histCells []t.Cell
+		if i > 0 {
+			//If there's no more history,
+			//then just leave them blank
+			//and let the normal running
+			//blank the rest of the buffer.
+			histCells = history[i]
+		}
+		i--
 
+		padding := w - (len(histCells) % w)
+		//Initialize with length of history[i], with enough room for length history[i] plus padding
+		cells := make([]t.Cell, len(histCells), len(histCells) + padding)
+		//Place history[i] in it
+		copy(cells[:len(histCells)], histCells)
+		for j := 0; j < padding; j++ {
+			cells = append(cells, t.Cell{Ch: ' ', Fg: Fg, Bg: Bg})
+		}
+		setCells(0, y, cells)
+	}
+	err = t.Flush()
+	return
+}
+
+func setCells(x, y int, cells []t.Cell) {
+	for c := range cells {
+		t.SetCell(x, y, cells[c].Ch, cells[c].Fg, cells[c].Bg)
+		x++
+	}
 }
 
 //Uses a simple for loop to write a string of characters on the screen in a single line. It does not flush to the screen.
@@ -29,6 +67,10 @@ func setString(x, y int, s string, fg, bg t.Attribute) {
 
 //interpret takes a string argument as a command or message typed on the input line. It interprets it and, using global variables, performs the appropriate actions.
 func interpret(input string) {
+	if len(input) == 0 {
+		return
+	}
+	
 	if strings.HasPrefix(input, "/") {
 		input = strings.ToLower(input)
 		//If the input is a command, then
@@ -38,6 +80,12 @@ func interpret(input string) {
 			close(Queue)
 		}
 	}
+	cells := make([]t.Cell, len(input))
+	for i := range input {
+		cells[i] = t.Cell{Ch: rune(input[i]), Fg: Fg, Bg: Bg}
+	}
+	TheChat.History = append(TheChat.History, cells)
+	showHistory(TheChat.History)
 }
 
 func loopIn(prompt string, queue <-chan t.Event) (err error) {
