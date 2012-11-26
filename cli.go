@@ -78,21 +78,40 @@ func interpret(input string) {
 		return
 	}
 
-	if strings.HasPrefix(input, "/") {
-		input = strings.ToLower(input)
-		//If the input is a command, then
-		//switch on everything after "/"
-		switch input[1:] {
-		case "quit":
-			close(Queue)
-		}
-	}
 	chat := M.Chats[ActiveChat]
 	if chat == nil {
 		log.Println("No active chat.")
 		return
 	}
 
+	if strings.HasPrefix(input, "/") {
+		args := strings.Split(input, " ")
+		//If the input is a command, then
+		//switch on the word after "/"
+		switch strings.ToLower(args[0][1:]) {
+		case "quit":
+			// /quit
+			close(Queue)
+		case "connect":
+			// /connect <NickName> <ipv6>
+			if len(args) < 3 {
+				chat.NewString(SysPrefix+"usage: /connect <NickName> <ipv6>", SysColor)
+				showHistory(chat.History)
+				return
+			}
+			chat.NewString(SysPrefix+"Connecting to "+args[2]+".", SysColor)
+			showHistory(chat.History)
+
+			ActiveChat = args[1]
+			M.NewChat(ActiveChat)
+			err := M.Chats[ActiveChat].Connect(args[2])
+			if err != nil {
+				M.Chats[ActiveChat].NewString(SysPrefix+err.Error(), SysColor)
+			}
+			showHistory(M.Chats[ActiveChat].History)
+		}
+		return
+	}
 	chat.NewString(OutPrefix+input, OutColor)
 	showHistory(chat.History)
 }
@@ -139,7 +158,7 @@ func loopIn(prompt string, queue <-chan t.Event) (err error) {
 				if err != nil {
 					return
 				}
-			case t.KeyBackspace, 0x7f:
+			case t.KeyBackspace, t.KeyBackspace2:
 				//If the user presses backspace,
 				//then we need to remove the most
 				//recent character, and decrement
@@ -158,7 +177,11 @@ func loopIn(prompt string, queue <-chan t.Event) (err error) {
 				//then we do nothing.
 
 			default:
-				input += string(ev.Ch)
+				if ev.Key == t.KeySpace {
+					input += " "
+				} else {
+					input += string(ev.Ch)
+				}
 
 				//If x is at the end of the screen,
 				//then we need to scroll the buffer

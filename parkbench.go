@@ -1,9 +1,10 @@
 package main
 
 import (
-	//"github.com/SashaCrofter/benchgolib"
+	bench "github.com/SashaCrofter/benchgolib"
 	t "github.com/nsf/termbox-go"
 	"log"
+	"net"
 	"os/user"
 	"path"
 )
@@ -41,7 +42,7 @@ func start() (err error) {
 	t.Clear(Fg, Bg)
 
 	setString(0, 0, "ParkBench", Fg|t.AttrBold, Bg)
-	M.Chats[ActiveChat].NewString(SysPrefix+"Use '/connect <ipv6>' to chat with a friend.", SysColor)
+	M.Chats[ActiveChat].NewString(SysPrefix+"Use '/connect <NickName> <ipv6>' to chat with a friend.", SysColor)
 
 	//This will flush to the screen, as well.
 	err = showHistory(M.Chats[ActiveChat].History)
@@ -57,4 +58,44 @@ func start() (err error) {
 	//Now, just take user input until the user exits.
 	err = loopIn(">> ", Queue)
 	return
+}
+
+func listen(m *Manager) (err error) {
+	var ln net.Listener
+	ln, err = net.Listen("tcp", ":"+bench.Port)
+	if err != nil {
+		return
+	}
+	go func(ln net.Listener, m *Manager) {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				log.Println(conn.RemoteAddr().String(), err)
+				continue
+			}
+			go handleConnection(m, conn)
+		}
+	}(ln, m)
+	return
+}
+
+func handleConnection(m *Manager, conn net.Conn) {
+	defer conn.Close()
+	s, _, content, err := bench.ReceiveMessage(conn, m)
+	if err != nil {
+		return
+	}
+	c := m.ChatBySID(s.SID)
+	if c == nil {
+		//This should never be invoked, because
+		//of the previous error catching block.
+		return
+	}
+	c.NewString(InPrefix+content, InColor)
+	if m.Chats[ActiveChat] == c {
+		//If c is the active chat, then we can
+		//update the history.
+		showHistory(c.History)
+	}
+	//Otherwise, there is no need.
 }

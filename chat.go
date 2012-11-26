@@ -25,14 +25,23 @@ func (m *Manager) AddSession(s *bench.Session) error {
 	return nil
 }
 
-//Goes through all existing chats until the SID matches.
-func (m *Manager) SessionByID(sid uint64) *bench.Session {
+//Goes through all existing chats until the SID matches their Session's.
+func (m *Manager) ChatBySID(sid uint64) *Chat {
 	for _, v := range m.Chats {
-		if v.Session.SID == sid {
-			return v.Session
+		if v.Session != nil && v.Session.SID == sid {
+			return v
 		}
 	}
 	return nil
+}
+
+//Goes through all existing chats until the SID matches.
+func (m *Manager) SessionByID(sid uint64) *bench.Session {
+	c := m.ChatBySID(sid)
+	if c == nil {
+		return nil
+	}
+	return c.Session
 }
 
 func (m *Manager) PrivateKey() *rsa.PrivateKey {
